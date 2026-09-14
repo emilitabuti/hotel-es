@@ -7,11 +7,11 @@ compile:
 
 #- Executa o sistema
 run:
-	java -cp build hotel.Main
+	java -cp build hotel.apresentacao.Main
 
 #- Executa os testes
 test:
-	java -cp build hotel.HotelTest
+	java -cp build hotel.apresentacao.HotelTest
 
 #- Limpa artefatos de compilacao
 clean:
