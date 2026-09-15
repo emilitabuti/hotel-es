@@ -59,6 +59,7 @@ public class HotelTest {
                     && "9999".equals(h.getCelular())
                     && "joao@x".equals(h.getEmail())) {
                 passou++;
+                System.out.println("PASSOU: testarCriarHospedeValido");
             } else {
                 System.out.println("FALHOU: testarCriarHospedeValido");
             }
@@ -80,6 +81,7 @@ public class HotelTest {
             System.out.println("FALHOU: testarCriarHospedeComCampoNuloFalha (nao lancou excecao)");
         } catch (IllegalArgumentException e) {
             passou++;
+            System.out.println("PASSOU: testarCriarHospedeComCampoNuloFalha");
         } catch (Throwable e) {
             System.out.println("FALHOU: testarCriarHospedeComCampoNuloFalha (" + e.getClass().getSimpleName() + ")");
         }
@@ -98,6 +100,7 @@ public class HotelTest {
             Hospede h2 = new Hospede("123", "Maria", "Rua Y", "8888", "maria@y");
             if (h1.equals(h2) && h1.hashCode() == h2.hashCode()) {
                 passou++;
+                System.out.println("PASSOU: testarHospedesComMesmoCpf");
             } else {
                 System.out.println("FALHOU: testarHospedesComMesmoCpf");
             }
@@ -119,6 +122,7 @@ public class HotelTest {
             Hospede h2 = new Hospede("456", "Joao", "Rua X", "9999", "joao@x");
             if (!h1.equals(h2)) {
                 passou++;
+                System.out.println("PASSOU: testarHospedesComCpfDiferente");
             } else {
                 System.out.println("FALHOU: testarHospedesComCpfDiferente");
             }
@@ -138,6 +142,7 @@ public class HotelTest {
         try {
             if ("Joao (CPF: 123)".equals(hospedePadrao().toString())) {
                 passou++;
+                System.out.println("PASSOU: testarToStringHospede");
             } else {
                 System.out.println("FALHOU: testarToStringHospede");
             }
@@ -162,6 +167,7 @@ public class HotelTest {
                     && !apto.estaReservado()
                     && !apto.estaOcupado()) {
                 passou++;
+                System.out.println("PASSOU: testarApartamentoNovoNasceLivre");
             } else {
                 System.out.println("FALHOU: testarApartamentoNovoNasceLivre");
             }
@@ -186,6 +192,7 @@ public class HotelTest {
                     && apto.getHospede() == h
                     && apto.estaReservado()) {
                 passou++;
+                System.out.println("PASSOU: testarReservarApartamentoLivre");
             } else {
                 System.out.println("FALHOU: testarReservarApartamentoLivre");
             }
@@ -209,6 +216,7 @@ public class HotelTest {
             System.out.println("FALHOU: testarReservarApartamentoReservadoFalha (nao lancou excecao)");
         } catch (IllegalStateException e) {
             passou++;
+            System.out.println("PASSOU: testarReservarApartamentoReservadoFalha");
         } catch (Throwable e) {
             System.out.println("FALHOU: testarReservarApartamentoReservadoFalha (" + e.getClass().getSimpleName() + ")");
         }
@@ -230,6 +238,7 @@ public class HotelTest {
                     && apto.getHospede() == h
                     && apto.estaOcupado()) {
                 passou++;
+                System.out.println("PASSOU: testarCheckinApartamentoLivre");
             } else {
                 System.out.println("FALHOU: testarCheckinApartamentoLivre");
             }
@@ -255,6 +264,7 @@ public class HotelTest {
                     && apto.getHospede() == h
                     && apto.estaOcupado()) {
                 passou++;
+                System.out.println("PASSOU: testarCheckinApartamentoReservado");
             } else {
                 System.out.println("FALHOU: testarCheckinApartamentoReservado");
             }
@@ -278,6 +288,7 @@ public class HotelTest {
             System.out.println("FALHOU: testarCheckinApartamentoOcupadoFalha (nao lancou excecao)");
         } catch (IllegalStateException e) {
             passou++;
+            System.out.println("PASSOU: testarCheckinApartamentoOcupadoFalha");
         } catch (Throwable e) {
             System.out.println("FALHOU: testarCheckinApartamentoOcupadoFalha (" + e.getClass().getSimpleName() + ")");
         }
@@ -294,6 +305,7 @@ public class HotelTest {
         try {
             if (new Apartamento().getPrecoDiaria() == 0f) {
                 passou++;
+                System.out.println("PASSOU: testarPrecoDiariaApartamentoBase");
             } else {
                 System.out.println("FALHOU: testarPrecoDiariaApartamentoBase");
             }
@@ -318,6 +330,7 @@ public class HotelTest {
                     && apto.getHospede() == null
                     && apto.estaLivre()) {
                 passou++;
+                System.out.println("PASSOU: testarCheckoutApartamentoOcupado");
             } else {
                 System.out.println("FALHOU: testarCheckoutApartamentoOcupado");
             }
@@ -343,6 +356,7 @@ public class HotelTest {
             apto.reservar(hospedePadrao());
             if ("Apartamento RESERVADO - Joao (CPF: 123)".equals(apto.toString())) {
                 passou++;
+                System.out.println("PASSOU: testarToStringApartamento");
             } else {
                 System.out.println("FALHOU: testarToStringApartamento");
             }
@@ -364,6 +378,7 @@ public class HotelTest {
             System.out.println("FALHOU: testarCheckoutApartamentoLivreFalha (nao lancou excecao)");
         } catch (IllegalStateException e) {
             passou++;
+            System.out.println("PASSOU: testarCheckoutApartamentoLivreFalha");
         } catch (Throwable e) {
             System.out.println("FALHOU: testarCheckoutApartamentoLivreFalha (" + e.getClass().getSimpleName() + ")");
         }
@@ -385,6 +400,7 @@ public class HotelTest {
                     && apto.getHospede() == null
                     && apto.estaLivre()) {
                 passou++;
+                System.out.println("PASSOU: testarCancelarReservaApartamentoReservado");
             } else {
                 System.out.println("FALHOU: testarCancelarReservaApartamentoReservado");
             }
@@ -406,6 +422,7 @@ public class HotelTest {
             System.out.println("FALHOU: testarCancelarReservaApartamentoLivreFalha (nao lancou excecao)");
         } catch (IllegalStateException e) {
             passou++;
+            System.out.println("PASSOU: testarCancelarReservaApartamentoLivreFalha");
         } catch (Throwable e) {
             System.out.println("FALHOU: testarCancelarReservaApartamentoLivreFalha (" + e.getClass().getSimpleName() + ")");
         }
@@ -433,6 +450,7 @@ public class HotelTest {
             apto.checkin(hospedePadrao());
             if (apto.getSymbol() == 'O') {
                 passou++;
+                System.out.println("PASSOU: testarSymbolApartamento");
             } else {
                 System.out.println("FALHOU: testarSymbolApartamento");
             }
@@ -451,4 +469,5 @@ public class HotelTest {
     private static Hospede hospedePadrao() {
         return new Hospede("123", "Joao", "Rua X", "9999", "joao@x");
     }
+
 }
