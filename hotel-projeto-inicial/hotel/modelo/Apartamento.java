@@ -1,6 +1,10 @@
 package hotel.modelo;
 
-public class Apartamento {
+import java.io.Serializable;
+
+public class Apartamento implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private Status status;
     private Hospede hospede;
 
@@ -12,20 +16,62 @@ public class Apartamento {
     public Status getStatus() { return status; }
     public Hospede getHospede() { return hospede; }
 
+    /**
+     * Reserva um apartamento livre.
+     *
+     * @param h hospede da reserva.
+     * @throws IllegalArgumentException se o hospede for nulo.
+     * @throws IllegalStateException se o apartamento nao estiver livre.
+     */
     public void reservar(Hospede h) {
-        throw new UnsupportedOperationException("Implementar: LIVRE -> RESERVADO");
+        validarHospede(h);
+        if (status != Status.LIVRE) {
+            throw new IllegalStateException("Apartamento precisa estar livre para reservar");
+        }
+        status = Status.RESERVADO;
+        hospede = h;
     }
 
+    /**
+     * Realiza check-in em apartamento livre ou reservado.
+     *
+     * @param h hospede do check-in.
+     * @throws IllegalArgumentException se o hospede for nulo.
+     * @throws IllegalStateException se o apartamento ja estiver ocupado.
+     */
     public void checkin(Hospede h) {
-        throw new UnsupportedOperationException("Implementar: LIVRE/RESERVADO -> OCUPADO");
+        validarHospede(h);
+        if (status == Status.OCUPADO) {
+            throw new IllegalStateException("Apartamento ja esta ocupado");
+        }
+        status = Status.OCUPADO;
+        hospede = h;
     }
 
+    /**
+     * Realiza checkout de um apartamento ocupado.
+     *
+     * @throws IllegalStateException se o apartamento nao estiver ocupado.
+     */
     public void checkout() {
-        throw new UnsupportedOperationException("Implementar: OCUPADO -> LIVRE");
+        if (status != Status.OCUPADO) {
+            throw new IllegalStateException("Apartamento precisa estar ocupado para checkout");
+        }
+        status = Status.LIVRE;
+        hospede = null;
     }
 
+    /**
+     * Cancela uma reserva existente.
+     *
+     * @throws IllegalStateException se o apartamento nao estiver reservado.
+     */
     public void cancelarReserva() {
-        throw new UnsupportedOperationException("Implementar: RESERVADO -> LIVRE");
+        if (status != Status.RESERVADO) {
+            throw new IllegalStateException("Apartamento precisa estar reservado para cancelar reserva");
+        }
+        status = Status.LIVRE;
+        hospede = null;
     }
 
     public boolean estaLivre() { return status == Status.LIVRE; }
@@ -40,6 +86,20 @@ public class Apartamento {
             case RESERVADO: return 'R';
             case OCUPADO: return 'O';
             default: return '?';
+        }
+    }
+
+    @Override
+    public String toString() {
+        if (hospede == null) {
+            return "Apartamento " + status;
+        }
+        return "Apartamento " + status + " - " + hospede;
+    }
+
+    private static void validarHospede(Hospede h) {
+        if (h == null) {
+            throw new IllegalArgumentException("Hospede nao pode ser nulo");
         }
     }
 }
