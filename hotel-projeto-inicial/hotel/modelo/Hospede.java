@@ -21,6 +21,8 @@ public class Hospede implements Serializable {
      * @param celular celular do hospede.
      * @param email email do hospede.
      * @throws IllegalArgumentException se algum campo for nulo ou vazio.
+     * @pre Todos os parametros devem ser nao nulos e nao vazios.
+     * @post O hospede e criado com os dados informados e nao pode ser alterado por setters.
      */
     public Hospede(String cpf, String nome, String endereco, String celular, String email) {
         validarObrigatorio(cpf, "cpf");
@@ -36,17 +38,71 @@ public class Hospede implements Serializable {
         this.email = email;
     }
 
+    /**
+     * Retorna o CPF do hospede.
+     *
+     * @return CPF informado no construtor.
+     * @pre Hospede criado.
+     * @post O estado do hospede permanece inalterado.
+     */
     public String getCpf() { return cpf; }
+
+    /**
+     * Retorna o nome do hospede.
+     *
+     * @return nome informado no construtor.
+     * @pre Hospede criado.
+     * @post O estado do hospede permanece inalterado.
+     */
     public String getNome() { return nome; }
+
+    /**
+     * Retorna o endereco do hospede.
+     *
+     * @return endereco informado no construtor.
+     * @pre Hospede criado.
+     * @post O estado do hospede permanece inalterado.
+     */
     public String getEndereco() { return endereco; }
+
+    /**
+     * Retorna o celular do hospede.
+     *
+     * @return celular informado no construtor.
+     * @pre Hospede criado.
+     * @post O estado do hospede permanece inalterado.
+     */
     public String getCelular() { return celular; }
+
+    /**
+     * Retorna o email do hospede.
+     *
+     * @return email informado no construtor.
+     * @pre Hospede criado.
+     * @post O estado do hospede permanece inalterado.
+     */
     public String getEmail() { return email; }
 
+    /**
+     * Retorna uma representacao textual do hospede.
+     *
+     * @return texto com nome e CPF do hospede.
+     * @pre Hospede criado.
+     * @post O estado do hospede permanece inalterado.
+     */
     @Override
     public String toString() {
         return nome + " (CPF: " + cpf + ")";
     }
 
+    /**
+     * Compara hospedes pelo CPF.
+     *
+     * @param o objeto a ser comparado.
+     * @return true se o objeto for um hospede com o mesmo CPF; false caso contrario.
+     * @pre Hospede criado.
+     * @post O estado do hospede permanece inalterado.
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -59,6 +115,13 @@ public class Hospede implements Serializable {
         return cpf.equals(hospede.cpf);
     }
 
+    /**
+     * Calcula o codigo hash baseado no CPF.
+     *
+     * @return codigo hash do CPF.
+     * @pre Hospede criado.
+     * @post O estado do hospede permanece inalterado.
+     */
     @Override
     public int hashCode() {
         return Objects.hash(cpf);
