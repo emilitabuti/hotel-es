@@ -137,15 +137,14 @@ public class Hotel {
 
         if (apto.estaOcupado()) { return false; }
 
-        //Se ja existia uma reserva, aproveita o identificador da reserva.
+        // Check-in de uma reserva existente
         if (apto.estaReservado() && apto.getHospede() != null) {
             String identificadorAnterior = apto.getHospede().getIdentificadorReserva();
             hospede.setIdentificadorReserva(identificadorAnterior);
         } else {
-            //Check-in direto, sem reserva anterior.
-            if (hospede.getIdentificadorReserva() == null) {
-                hospede.setIdentificadorReserva(criarIdentificadorReserva(andar, numero));
-            }
+            // Check-in direto sempre representa uma nova hospedagem
+            String novoIdentificador = criarIdentificadorReserva(andar, numero);
+            hospede.setIdentificadorReserva(novoIdentificador);
         }
         apto.checkin(hospede);
         return true;

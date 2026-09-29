@@ -25,13 +25,13 @@ public class Main {
     }
 
     private static int lerAndar() {
-        System.out.print("Andar (0-" + (Hotel.NUM_ANDARES - 1) + "): ");
-        return Integer.parseInt(scanner.nextLine());
+        System.out.print("Andar (1-" + Hotel.NUM_ANDARES + "): ");
+        return Integer.parseInt(scanner.nextLine()) - 1;
     }
 
     private static int lerNumero() {
-        System.out.print("Número (0-" + (Hotel.APTOS_POR_ANDAR - 1) + "): ");
-        return Integer.parseInt(scanner.nextLine());
+        System.out.print("Número (1-" + Hotel.APTOS_POR_ANDAR + "): ");
+        return Integer.parseInt(scanner.nextLine()) - 1;
     }
 
     public static void main(String[] args) {

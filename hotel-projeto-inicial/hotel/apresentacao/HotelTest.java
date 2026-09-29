@@ -2,6 +2,8 @@ package hotel.apresentacao;
 
 import hotel.modelo.*;
 import hotel.negocio.Hotel;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 
 /**
  * Suite simples de testes do nucleo CJ11.
