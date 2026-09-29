@@ -5,24 +5,24 @@ import java.util.Objects;
 
 public class Hospede implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private final String cpf;
     private final String nome;
     private final String endereco;
     private final String celular;
     private final String email;
+    private String identificadorReserva;
 
     /**
-     * Cria um hospede imutavel com todos os campos obrigatorios.
+     * Cria um hospede com seus dados pessoais.
      *
-     * @param cpf CPF do hospede.
-     * @param nome nome do hospede.
-     * @param endereco endereco do hospede.
-     * @param celular celular do hospede.
-     * @param email email do hospede.
-     * @throws IllegalArgumentException se algum campo for nulo ou vazio.
-     * @pre Todos os parametros devem ser nao nulos e nao vazios.
-     * @post O hospede e criado com os dados informados e nao pode ser alterado por setters.
+     * @param cpf CPF do hospede
+     * @param nome nome do hospede
+     * @param endereco endereco do hospede
+     * @param celular celular do hospede
+     * @param email email do hospede
+     * @throws IllegalArgumentException se algum campo for nulo ou vazio
+     * @pre Todos os dados devem ser preenchidos
+     * @post Hospede criado sem identificador de reserva
      */
     public Hospede(String cpf, String nome, String endereco, String celular, String email) {
         validarObrigatorio(cpf, "cpf");
@@ -36,6 +36,7 @@ public class Hospede implements Serializable {
         this.endereco = endereco;
         this.celular = celular;
         this.email = email;
+        this.identificadorReserva = null;
     }
 
     /**
@@ -84,7 +85,29 @@ public class Hospede implements Serializable {
     public String getEmail() { return email; }
 
     /**
-     * Retorna uma representacao textual do hospede.
+     * Retorna o identificador da reserva atual.
+     *
+     * @return identificador da reserva
+     * @pre Hospede criado
+     * @post Estado do hospede nao e alterado
+     */
+    public String getIdentificadorReserva() { return identificadorReserva; }
+
+    /**
+     * Atualiza o identificador quando ocorre reserva ou troca de quarto
+     *
+     * @param identificador novo identificador
+     * @throws IllegalArgumentException se o identificador for vazio
+     * @pre Identificador deve ser valido
+     * @post Identificador da hospedagem e atualizado
+     */
+    public void setIdentificadorReserva(String identificador) {
+        validarObrigatorio(identificador, "identificadorReserva");
+        this.identificadorReserva = identificador;
+    }
+
+    /**
+     * Retorna uma representacao textual do hospede
      *
      * @return texto com nome e CPF do hospede.
      * @pre Hospede criado.
@@ -92,11 +115,15 @@ public class Hospede implements Serializable {
      */
     @Override
     public String toString() {
-        return nome + " (CPF: " + cpf + ")";
+        String dados = nome + " (CPF: " + cpf + ")";
+        if (identificadorReserva != null) {
+            dados += " - Reserva: " + identificadorReserva;
+        }
+        return dados;
     }
 
     /**
-     * Compara hospedes pelo CPF.
+     * Compara hospedes pelo CPF
      *
      * @param o objeto a ser comparado.
      * @return true se o objeto for um hospede com o mesmo CPF; false caso contrario.
