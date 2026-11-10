@@ -340,18 +340,52 @@ public class Hotel {
         servicos.add(new Servico(nome, preco));
     }
 
+    /**
+     * Registra o consumo de um servico em um apartamento ocupado.
+     *
+     * @param andar andar do apartamento
+     * @param numero numero do apartamento
+     * @param indiceServico indice do servico no cardapio
+     * @param quantidade quantidade consumida, maior que zero
+     * @return true se o consumo foi registrado; false se o apartamento nao estiver ocupado
+     * @throws IllegalArgumentException se as coordenadas, o indice ou a quantidade forem invalidos
+     */
     public boolean registrarConsumo(int andar, int numero, int indiceServico, int quantidade) {
-        if (!aptoValido(andar, numero)) {
-            throw new IllegalArgumentException("Andar ou numero invalido");
+        validarCoordenadas(andar, numero);
+        if (indiceServico < 0 || indiceServico >= servicos.size()) {
+            throw new IllegalArgumentException("Indice de servico invalido");
         }
-        throw new UnsupportedOperationException("Implementar registrarConsumo");
+        if (quantidade <= 0) {
+            throw new IllegalArgumentException("Quantidade deve ser maior que zero");
+        }
+
+        Apartamento apartamento = matriz[andar][numero];
+        if (!apartamento.estaOcupado()) {
+            return false;
+        }
+
+        consumos.add(new Consumo(apartamento, servicos.get(indiceServico), quantidade));
+        return true;
     }
 
+    /**
+     * Retorna os consumos associados a um apartamento.
+     *
+     * @param andar andar do apartamento
+     * @param numero numero do apartamento
+     * @return lista independente com os consumos do apartamento
+     * @throws IllegalArgumentException se as coordenadas forem invalidas
+     */
     public ArrayList<Consumo> getConsumosDoApartamento(int andar, int numero) {
-        if (!aptoValido(andar, numero)) {
-            throw new IllegalArgumentException("Andar ou numero invalido");
+        validarCoordenadas(andar, numero);
+        Apartamento apartamento = matriz[andar][numero];
+        ArrayList<Consumo> consumosDoApartamento = new ArrayList<>();
+        for (Consumo consumo : consumos) {
+            if (consumo.getApartamento() == apartamento) {
+                consumosDoApartamento.add(consumo);
+            }
         }
-        throw new UnsupportedOperationException("Implementar getConsumosDoApartamento");
+        return consumosDoApartamento;
     }
 
     public Fatura emitirFatura(int andar, int numero, int dias) {
