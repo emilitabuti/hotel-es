@@ -3,8 +3,11 @@ package hotel.modelo;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Locale;
 
 public class Fatura {
+    private static final Locale LOCALE_BRASILEIRO = Locale.forLanguageTag("pt-BR");
+
     private final Apartamento apartamento;
     private final int dias;
     private final List<Consumo> consumos;
@@ -113,7 +116,7 @@ public class Fatura {
         String separador = System.lineSeparator();
         StringBuilder fatura = new StringBuilder(separador)
                 .append("========== FATURA ==========").append(separador);
-        fatura.append(String.format(java.util.Locale.forLanguageTag("pt-BR"),
+        fatura.append(String.format(LOCALE_BRASILEIRO,
                 "Diarias: %d x R$ %.2f = R$ %.2f%n",
                 dias, precoDiaria, totalDiarias));
         fatura.append("Servicos consumidos:").append(separador);
@@ -124,9 +127,9 @@ public class Fatura {
                 fatura.append("  ").append(consumo).append(separador);
             }
         }
-        fatura.append(String.format(java.util.Locale.forLanguageTag("pt-BR"),
+        fatura.append(String.format(LOCALE_BRASILEIRO,
                 "Subtotal de servicos: R$ %.2f%n", totalConsumos));
-        fatura.append(String.format(java.util.Locale.forLanguageTag("pt-BR"),
+        fatura.append(String.format(LOCALE_BRASILEIRO,
                 "TOTAL GERAL: R$ %.2f%n", getTotalGeral()));
         fatura.append("============================");
         return fatura.toString();
