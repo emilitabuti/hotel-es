@@ -65,6 +65,10 @@ public class HotelTest {
         testarCriarFaturaComApartamentoNuloFalha();
         testarCriarFaturaComDiasInvalidosFalha();
         testarCriarFaturaComListaDeConsumosNulaFalha();
+        testarCriarFaturaComConsumoNuloFalha();
+        testarFaturaFormataResumoComConsumos();
+        testarFaturaFormataMensagemSemConsumos();
+        testarFaturaMantemPrecoDiariaOriginalNoResumo();
         testarEmitirFaturaIntegraDiariasEConsumos();
         testarEmitirFaturaApartamentoPremium();
         testarEmitirFaturaComCoordenadaInvalidaFalha();
@@ -2181,6 +2185,90 @@ public class HotelTest {
             System.out.println("PASSOU: testarCriarFaturaComListaDeConsumosNulaFalha");
         } catch (Throwable e) {
             System.out.println("FALHOU: testarCriarFaturaComListaDeConsumosNulaFalha (" + e.getClass().getSimpleName() + ")");
+        }
+    }
+
+    /**
+     * Verifica que uma fatura rejeita elementos nulos na lista de consumos.
+     */
+    static void testarCriarFaturaComConsumoNuloFalha() {
+        total++;
+        try {
+            new Fatura(new ApartamentoSimples(), 1, java.util.Arrays.asList((Consumo) null));
+            System.out.println("FALHOU: testarCriarFaturaComConsumoNuloFalha (nao lancou excecao)");
+        } catch (IllegalArgumentException e) {
+            passou++;
+            System.out.println("PASSOU: testarCriarFaturaComConsumoNuloFalha");
+        } catch (Throwable e) {
+            System.out.println("FALHOU: testarCriarFaturaComConsumoNuloFalha (" + e.getClass().getSimpleName() + ")");
+        }
+    }
+
+    /**
+     * Verifica que a fatura mostra diarias, itens, subtotal e total em pt-BR.
+     */
+    static void testarFaturaFormataResumoComConsumos() {
+        total++;
+        Apartamento apartamento = new ApartamentoSimples();
+        java.util.List<Consumo> consumos = java.util.Arrays.asList(
+                new Consumo(apartamento, new Servico("Cafe", 12.5f), 2),
+                new Consumo(apartamento, new Servico("Agua", 5.0f), 1));
+        String separador = System.lineSeparator();
+        String esperado = separador
+                + "========== FATURA ==========" + separador
+                + "Diarias: 2 x R$ 150,00 = R$ 300,00" + separador
+                + "Servicos consumidos:" + separador
+                + "  Cafe | 2 x R$ 12,50 = R$ 25,00" + separador
+                + "  Agua | 1 x R$ 5,00 = R$ 5,00" + separador
+                + "Subtotal de servicos: R$ 30,00" + separador
+                + "TOTAL GERAL: R$ 330,00" + separador
+                + "============================";
+        if (esperado.equals(new Fatura(apartamento, 2, consumos).toString())) {
+            passou++;
+            System.out.println("PASSOU: testarFaturaFormataResumoComConsumos");
+        } else {
+            System.out.println("FALHOU: testarFaturaFormataResumoComConsumos");
+        }
+    }
+
+    /**
+     * Verifica a mensagem exibida em uma fatura sem consumos.
+     */
+    static void testarFaturaFormataMensagemSemConsumos() {
+        total++;
+        String fatura = new Fatura(
+                new ApartamentoPremium(),
+                1,
+                java.util.Collections.<Consumo>emptyList()).toString();
+        if (fatura.contains("Nenhum consumo registrado.")
+                && fatura.contains("TOTAL GERAL: R$ 350,00")) {
+            passou++;
+            System.out.println("PASSOU: testarFaturaFormataMensagemSemConsumos");
+        } else {
+            System.out.println("FALHOU: testarFaturaFormataMensagemSemConsumos");
+        }
+    }
+
+    /**
+     * Verifica que o resumo preserva o preco diario usado ao criar a fatura.
+     */
+    static void testarFaturaMantemPrecoDiariaOriginalNoResumo() {
+        total++;
+        final float[] preco = {100.0f};
+        Apartamento apartamento = new Apartamento() {
+            @Override
+            public float getPrecoDiaria() {
+                return preco[0];
+            }
+        };
+        Fatura fatura = new Fatura(apartamento, 2, java.util.Collections.<Consumo>emptyList());
+        preco[0] = 200.0f;
+        if (fatura.getTotalDiarias() == 200.0f
+                && fatura.toString().contains("Diarias: 2 x R$ 100,00 = R$ 200,00")) {
+            passou++;
+            System.out.println("PASSOU: testarFaturaMantemPrecoDiariaOriginalNoResumo");
+        } else {
+            System.out.println("FALHOU: testarFaturaMantemPrecoDiariaOriginalNoResumo");
         }
     }
 
