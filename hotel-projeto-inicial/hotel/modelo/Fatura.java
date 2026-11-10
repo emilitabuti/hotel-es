@@ -8,6 +8,8 @@ public class Fatura {
     private final Apartamento apartamento;
     private final int dias;
     private final List<Consumo> consumos;
+    private final float totalDiarias;
+    private final float totalConsumos;
 
     /**
      * Cria uma fatura para um apartamento e um periodo de hospedagem.
@@ -30,6 +32,8 @@ public class Fatura {
         this.apartamento = apto;
         this.dias = dias;
         this.consumos = new ArrayList<>(consumos);
+        this.totalDiarias = calcularTotalDiarias();
+        this.totalConsumos = calcularTotalConsumos();
     }
 
     /**
@@ -70,6 +74,10 @@ public class Fatura {
      * @return preco da diaria multiplicado pela quantidade de dias
      */
     public float getTotalDiarias() {
+        return totalDiarias;
+    }
+
+    private float calcularTotalDiarias() {
         return dias * apartamento.getPrecoDiaria();
     }
 
@@ -79,6 +87,10 @@ public class Fatura {
      * @return soma dos valores dos consumos
      */
     public float getTotalConsumos() {
+        return totalConsumos;
+    }
+
+    private float calcularTotalConsumos() {
         float total = 0.0f;
         for (Consumo consumo : consumos) {
             total += consumo.getTotal();
