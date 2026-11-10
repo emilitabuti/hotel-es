@@ -33,6 +33,15 @@ public class HotelTest {
         testarHospedeComIdentificadorReserva();
         testarAlteracaoIdentificadorReserva();
 
+        //servico
+        testarCriarServicoValido();
+        testarCriarServicoComNomeNuloFalha();
+        testarCriarServicoComNomeVazioFalha();
+        testarCriarServicoComPrecoInvalidoFalha();
+        testarToStringServico();
+        testarCadastrarServicoNoHotel();
+        testarCadastrarServicoInvalidoNaoAdiciona();
+
         //apartamento
         testarApartamentoNovoNasceLivre();
         testarReservarApartamentoLivre();
@@ -1594,6 +1603,144 @@ public class HotelTest {
             System.out.println("PASSOU: testarHotelVoltaAFicarVazioAposCancelamento");
         } else {
             System.out.println("FALHOU: testarHotelVoltaAFicarVazioAposCancelamento");
+        }
+    }
+
+    /**
+     * Verifica a criacao de um servico com dados validos.
+     */
+    static void testarCriarServicoValido() {
+        total++;
+        try {
+            Servico servico = new Servico("Cafe", 12.5f);
+            if ("Cafe".equals(servico.getNome()) && servico.getPreco() == 12.5f) {
+                passou++;
+                System.out.println("PASSOU: testarCriarServicoValido");
+            } else {
+                System.out.println("FALHOU: testarCriarServicoValido");
+            }
+        } catch (Throwable e) {
+            System.out.println("FALHOU: testarCriarServicoValido (" + e.getClass().getSimpleName() + ")");
+        }
+    }
+
+    /**
+     * Verifica que um servico nao aceita nome nulo.
+     */
+    static void testarCriarServicoComNomeNuloFalha() {
+        total++;
+        try {
+            new Servico(null, 12.5f);
+            System.out.println("FALHOU: testarCriarServicoComNomeNuloFalha (nao lancou excecao)");
+        } catch (IllegalArgumentException e) {
+            passou++;
+            System.out.println("PASSOU: testarCriarServicoComNomeNuloFalha");
+        } catch (Throwable e) {
+            System.out.println("FALHOU: testarCriarServicoComNomeNuloFalha (" + e.getClass().getSimpleName() + ")");
+        }
+    }
+
+    /**
+     * Verifica que um servico nao aceita nome vazio ou apenas espacos.
+     */
+    static void testarCriarServicoComNomeVazioFalha() {
+        total++;
+        boolean correto = true;
+        for (String nome : new String[] {"", "   "}) {
+            try {
+                new Servico(nome, 12.5f);
+                correto = false;
+            } catch (IllegalArgumentException e) {
+                // Entrada invalida rejeitada como esperado.
+            } catch (Throwable e) {
+                correto = false;
+            }
+        }
+        if (correto) {
+            passou++;
+            System.out.println("PASSOU: testarCriarServicoComNomeVazioFalha");
+        } else {
+            System.out.println("FALHOU: testarCriarServicoComNomeVazioFalha");
+        }
+    }
+
+    /**
+     * Verifica que um servico nao aceita preco nao positivo ou nao finito.
+     */
+    static void testarCriarServicoComPrecoInvalidoFalha() {
+        total++;
+        boolean correto = true;
+        for (float preco : new float[] {0.0f, -1.0f, Float.NaN, Float.POSITIVE_INFINITY}) {
+            try {
+                new Servico("Cafe", preco);
+                correto = false;
+            } catch (IllegalArgumentException e) {
+                // Entrada invalida rejeitada como esperado.
+            } catch (Throwable e) {
+                correto = false;
+            }
+        }
+        if (correto) {
+            passou++;
+            System.out.println("PASSOU: testarCriarServicoComPrecoInvalidoFalha");
+        } else {
+            System.out.println("FALHOU: testarCriarServicoComPrecoInvalidoFalha");
+        }
+    }
+
+    /**
+     * Verifica a representacao textual do servico.
+     */
+    static void testarToStringServico() {
+        total++;
+        String resultado = new Servico("Cafe", 12.5f).toString();
+        if (resultado.contains("Cafe") && resultado.contains("12.5")) {
+            passou++;
+            System.out.println("PASSOU: testarToStringServico");
+        } else {
+            System.out.println("FALHOU: testarToStringServico");
+        }
+    }
+
+    /**
+     * Verifica que o hotel cadastra servicos no cardapio.
+     */
+    static void testarCadastrarServicoNoHotel() {
+        total++;
+        try {
+            Hotel hotel = new Hotel();
+            hotel.cadastrarServico("Cafe", 12.5f);
+            if (hotel.getServicos().size() == 1
+                    && "Cafe".equals(hotel.getServicos().get(0).getNome())
+                    && hotel.getServicos().get(0).getPreco() == 12.5f) {
+                passou++;
+                System.out.println("PASSOU: testarCadastrarServicoNoHotel");
+            } else {
+                System.out.println("FALHOU: testarCadastrarServicoNoHotel");
+            }
+        } catch (Throwable e) {
+            System.out.println("FALHOU: testarCadastrarServicoNoHotel (" + e.getClass().getSimpleName() + ")");
+        }
+    }
+
+    /**
+     * Verifica que o hotel rejeita um servico invalido sem alterar o cardapio.
+     */
+    static void testarCadastrarServicoInvalidoNaoAdiciona() {
+        total++;
+        Hotel hotel = new Hotel();
+        try {
+            hotel.cadastrarServico(" ", 12.5f);
+            System.out.println("FALHOU: testarCadastrarServicoInvalidoNaoAdiciona (nao lancou excecao)");
+        } catch (IllegalArgumentException e) {
+            if (hotel.getServicos().isEmpty()) {
+                passou++;
+                System.out.println("PASSOU: testarCadastrarServicoInvalidoNaoAdiciona");
+            } else {
+                System.out.println("FALHOU: testarCadastrarServicoInvalidoNaoAdiciona (cardapio alterado)");
+            }
+        } catch (Throwable e) {
+            System.out.println("FALHOU: testarCadastrarServicoInvalidoNaoAdiciona (" + e.getClass().getSimpleName() + ")");
         }
     }
 }
