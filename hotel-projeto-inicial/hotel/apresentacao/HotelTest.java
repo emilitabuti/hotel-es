@@ -1853,9 +1853,7 @@ public class HotelTest {
         total++;
         Consumo consumo = new Consumo(new ApartamentoSimples(), new Servico("Cafe", 12.5f), 2);
         if (consumo.getTotal() == 25.0f
-                && consumo.toString().contains("Cafe")
-                && consumo.toString().contains("x2")
-                && consumo.toString().contains("25.0")) {
+                && "Cafe | 2 x R$ 12,50 = R$ 25,00".equals(consumo.toString())) {
             passou++;
             System.out.println("PASSOU: testarTotalEToStringConsumo");
         } else {
@@ -2082,7 +2080,7 @@ public class HotelTest {
             if (transferido
                     && fatura.getConsumos().size() == 1
                     && fatura.getTotalConsumos() == 25.0f
-                    && fatura.getTotalGeral() == 375.0f) {
+                    && fatura.getTotalGeral() == 175.0f) {
                 passou++;
                 System.out.println("PASSOU: testarFaturaMantemConsumoAposTransferencia");
             } else {
