@@ -1848,15 +1848,20 @@ public class HotelTest {
         }
     }
 
+    private static Hotel hotelComApartamentoOcupadoEComServico() {
+        Hotel hotel = new Hotel();
+        hotel.cadastrarServico("Cafe", 12.5f);
+        hotel.realizarCheckin(0, 0, hospedePadrao());
+        return hotel;
+    }
+
     /**
      * Verifica registro e calculo do total de um consumo em quarto ocupado.
      */
     static void testarRegistrarConsumoEmApartamentoOcupado() {
         total++;
         try {
-            Hotel hotel = new Hotel();
-            hotel.cadastrarServico("Cafe", 12.5f);
-            hotel.realizarCheckin(0, 0, hospedePadrao());
+            Hotel hotel = hotelComApartamentoOcupadoEComServico();
             boolean registrado = hotel.registrarConsumo(0, 0, 0, 2);
             if (registrado && hotel.getConsumos().size() == 1
                     && hotel.getConsumos().get(0).getApartamento() == hotel.getApartamento(0, 0)
@@ -1898,9 +1903,7 @@ public class HotelTest {
      */
     static void testarRegistrarConsumoComIndiceServicoInvalidoFalha() {
         total++;
-        Hotel hotel = new Hotel();
-        hotel.cadastrarServico("Cafe", 12.5f);
-        hotel.realizarCheckin(0, 0, hospedePadrao());
+        Hotel hotel = hotelComApartamentoOcupadoEComServico();
         try {
             hotel.registrarConsumo(0, 0, 1, 1);
             System.out.println("FALHOU: testarRegistrarConsumoComIndiceServicoInvalidoFalha (nao lancou excecao)");
@@ -1921,9 +1924,7 @@ public class HotelTest {
      */
     static void testarRegistrarConsumoComQuantidadeInvalidaFalha() {
         total++;
-        Hotel hotel = new Hotel();
-        hotel.cadastrarServico("Cafe", 12.5f);
-        hotel.realizarCheckin(0, 0, hospedePadrao());
+        Hotel hotel = hotelComApartamentoOcupadoEComServico();
         boolean correto = true;
         try {
             for (int quantidade : new int[] {0, -1}) {
