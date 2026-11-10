@@ -118,14 +118,20 @@ public class HotelTest {
         //hotel - check-in
         testarCheckinDiretoPeloHotel();
         testarCheckinDeReservaPeloHotel();
+        testarCheckinDeReservaComCpfDiferenteFalha();
+        testarCheckinDeReservaPreservaHospedeTitular();
         testarCheckinEmApartamentoOcupadoPeloHotelFalha();
         testarCheckinCoordenadaInvalida();
         testarCheckinComHospedeNuloPeloHotelFalha();
 
         //hotel - check-out
         testarCheckoutPeloHotel();
+        testarCheckoutRemoveConsumosDaHospedagem();
         testarCheckoutApartamentoLivrePeloHotelFalha();
         testarCheckoutCoordenadaInvalida();
+        testarFinalizarHospedagemEmiteFaturaELiberaApartamento();
+        testarFinalizarHospedagemInvalidaNaoAlteraEstado();
+        testarEmitirFaturaExigeApartamentoOcupado();
 
         //hotel - cancelamento
         testarCancelarReservaPeloHotel();
@@ -1114,6 +1120,47 @@ public class HotelTest {
         }
     }
 
+    /**
+     * Verifica que uma reserva nao pode ser usada por hospede com outro CPF.
+     */
+    static void testarCheckinDeReservaComCpfDiferenteFalha() {
+        total++;
+        Hotel hotel = new Hotel();
+        Hospede titular = hospedePadrao();
+        hotel.reservarApartamento(0, 0, titular);
+        Hospede outro = new Hospede("456", "Maria", "Rua Y", "8888", "maria@y");
+        boolean resultado = hotel.realizarCheckin(0, 0, outro);
+        if (!resultado && hotel.getApartamento(0, 0).estaReservado()
+                && hotel.getApartamento(0, 0).getHospede() == titular
+                && outro.getIdentificadorReserva() == null) {
+            passou++;
+            System.out.println("PASSOU: testarCheckinDeReservaComCpfDiferenteFalha");
+        } else {
+            System.out.println("FALHOU: testarCheckinDeReservaComCpfDiferenteFalha");
+        }
+    }
+
+    /**
+     * Verifica que o check-in preserva o cadastro titular da reserva.
+     */
+    static void testarCheckinDeReservaPreservaHospedeTitular() {
+        total++;
+        Hotel hotel = new Hotel();
+        Hospede titular = hospedePadrao();
+        hotel.reservarApartamento(0, 0, titular);
+        String identificador = titular.getIdentificadorReserva();
+        Hospede checkin = new Hospede("123", "Joao Atualizado", "Rua Nova", "1111", "novo@x");
+        boolean resultado = hotel.realizarCheckin(0, 0, checkin);
+        if (resultado && hotel.getApartamento(0, 0).estaOcupado()
+                && hotel.getApartamento(0, 0).getHospede() == titular
+                && identificador.equals(checkin.getIdentificadorReserva())) {
+            passou++;
+            System.out.println("PASSOU: testarCheckinDeReservaPreservaHospedeTitular");
+        } else {
+            System.out.println("FALHOU: testarCheckinDeReservaPreservaHospedeTitular");
+        }
+    }
+
 
     /**
      * Verifica que nao e permitido check-in em apartamento ocupado.
@@ -1194,6 +1241,26 @@ public class HotelTest {
     }
 
     /**
+     * Verifica que o checkout remove os consumos da hospedagem encerrada.
+     */
+    static void testarCheckoutRemoveConsumosDaHospedagem() {
+        total++;
+        Hotel hotel = hotelComApartamentoOcupadoEComServico();
+        hotel.registrarConsumo(0, 0, 0, 2);
+        boolean checkout = hotel.realizarCheckout(0, 0);
+        Hospede novoHospede = new Hospede("456", "Maria", "Rua Y", "8888", "maria@y");
+        boolean novoCheckin = hotel.realizarCheckin(0, 0, novoHospede);
+        Fatura fatura = hotel.emitirFatura(0, 0, 1);
+        if (checkout && novoCheckin && hotel.getConsumos().isEmpty()
+                && fatura.getConsumos().isEmpty() && fatura.getTotalConsumos() == 0.0f) {
+            passou++;
+            System.out.println("PASSOU: testarCheckoutRemoveConsumosDaHospedagem");
+        } else {
+            System.out.println("FALHOU: testarCheckoutRemoveConsumosDaHospedagem");
+        }
+    }
+
+    /**
      * Verifica que checkout de apartamento livre retorna false.
      *
      * @pre Apartamento livre.
@@ -1226,6 +1293,111 @@ public class HotelTest {
         } catch (IllegalArgumentException e) {
             passou++;
             System.out.println("PASSOU: testarCheckoutCoordenadaInvalida");
+        }
+    }
+
+    /**
+     * Verifica que finalizar hospedagem emite a fatura antes de liberar o quarto.
+     */
+    static void testarFinalizarHospedagemEmiteFaturaELiberaApartamento() {
+        total++;
+        try {
+            Hotel hotel = hotelComApartamentoOcupadoEComServico();
+            hotel.registrarConsumo(0, 0, 0, 2);
+            Fatura fatura = invocarFinalizarHospedagem(hotel, 0, 0, 2);
+            if (fatura.getTotalDiarias() == 300.0f
+                    && fatura.getTotalConsumos() == 25.0f
+                    && fatura.getTotalGeral() == 325.0f
+                    && hotel.getApartamento(0, 0).estaLivre()
+                    && hotel.getApartamento(0, 0).getHospede() == null
+                    && hotel.getConsumos().isEmpty()) {
+                passou++;
+                System.out.println("PASSOU: testarFinalizarHospedagemEmiteFaturaELiberaApartamento");
+            } else {
+                System.out.println("FALHOU: testarFinalizarHospedagemEmiteFaturaELiberaApartamento");
+            }
+        } catch (Throwable e) {
+            System.out.println("FALHOU: testarFinalizarHospedagemEmiteFaturaELiberaApartamento (" + e.getClass().getSimpleName() + ")");
+        }
+    }
+
+    /**
+     * Verifica que falhas ao finalizar nao liberam apartamento nem apagam consumos.
+     */
+    static void testarFinalizarHospedagemInvalidaNaoAlteraEstado() {
+        total++;
+        Hotel hotel = hotelComApartamentoOcupadoEComServico();
+        hotel.registrarConsumo(0, 0, 0, 1);
+        boolean rejeitouDiasInvalidos = false;
+        try {
+            invocarFinalizarHospedagem(hotel, 0, 0, 0);
+        } catch (IllegalArgumentException e) {
+            rejeitouDiasInvalidos = true;
+        } catch (Throwable e) {
+            // Falha diferente da validacao esperada.
+        }
+        boolean estadoPreservado = hotel.getApartamento(0, 0).estaOcupado()
+                && hotel.getConsumos().size() == 1;
+        boolean rejeitouQuartoLivre = false;
+        try {
+            invocarFinalizarHospedagem(hotel, 0, 1, 1);
+        } catch (IllegalStateException e) {
+            rejeitouQuartoLivre = true;
+        } catch (Throwable e) {
+            // Falha diferente da validacao esperada.
+        }
+        if (rejeitouDiasInvalidos && estadoPreservado && rejeitouQuartoLivre
+                && hotel.getApartamento(0, 0).estaOcupado()
+                && hotel.getConsumos().size() == 1) {
+            passou++;
+            System.out.println("PASSOU: testarFinalizarHospedagemInvalidaNaoAlteraEstado");
+        } else {
+            System.out.println("FALHOU: testarFinalizarHospedagemInvalidaNaoAlteraEstado");
+        }
+    }
+
+    private static Fatura invocarFinalizarHospedagem(Hotel hotel, int andar, int numero, int dias) {
+        try {
+            java.lang.reflect.Method metodo = Hotel.class.getMethod(
+                    "finalizarHospedagem", int.class, int.class, int.class);
+            return (Fatura) metodo.invoke(hotel, andar, numero, dias);
+        } catch (java.lang.reflect.InvocationTargetException e) {
+            Throwable causa = e.getCause();
+            if (causa instanceof RuntimeException) {
+                throw (RuntimeException) causa;
+            }
+            throw new IllegalStateException(causa);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    /**
+     * Verifica que nao se emite fatura para apartamento livre ou reservado.
+     */
+    static void testarEmitirFaturaExigeApartamentoOcupado() {
+        total++;
+        Hotel hotel = new Hotel();
+        hotel.reservarApartamento(0, 0, hospedePadrao());
+        boolean livreRejeitado = false;
+        boolean reservadoRejeitado = false;
+        try {
+            hotel.emitirFatura(0, 1, 1);
+        } catch (IllegalStateException e) {
+            livreRejeitado = true;
+        }
+        try {
+            hotel.emitirFatura(0, 0, 1);
+        } catch (IllegalStateException e) {
+            reservadoRejeitado = true;
+        }
+        if (livreRejeitado && reservadoRejeitado
+                && hotel.getApartamento(0, 1).estaLivre()
+                && hotel.getApartamento(0, 0).estaReservado()) {
+            passou++;
+            System.out.println("PASSOU: testarEmitirFaturaExigeApartamentoOcupado");
+        } else {
+            System.out.println("FALHOU: testarEmitirFaturaExigeApartamentoOcupado");
         }
     }
 
