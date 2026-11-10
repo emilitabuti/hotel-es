@@ -1304,7 +1304,7 @@ public class HotelTest {
         try {
             Hotel hotel = hotelComApartamentoOcupadoEComServico();
             hotel.registrarConsumo(0, 0, 0, 2);
-            Fatura fatura = invocarFinalizarHospedagem(hotel, 0, 0, 2);
+            Fatura fatura = hotel.finalizarHospedagem(0, 0, 2);
             if (fatura.getTotalDiarias() == 300.0f
                     && fatura.getTotalConsumos() == 25.0f
                     && fatura.getTotalGeral() == 325.0f
@@ -1330,7 +1330,7 @@ public class HotelTest {
         hotel.registrarConsumo(0, 0, 0, 1);
         boolean rejeitouDiasInvalidos = false;
         try {
-            invocarFinalizarHospedagem(hotel, 0, 0, 0);
+            hotel.finalizarHospedagem(0, 0, 0);
         } catch (IllegalArgumentException e) {
             rejeitouDiasInvalidos = true;
         } catch (Throwable e) {
@@ -1340,7 +1340,7 @@ public class HotelTest {
                 && hotel.getConsumos().size() == 1;
         boolean rejeitouQuartoLivre = false;
         try {
-            invocarFinalizarHospedagem(hotel, 0, 1, 1);
+            hotel.finalizarHospedagem(0, 1, 1);
         } catch (IllegalStateException e) {
             rejeitouQuartoLivre = true;
         } catch (Throwable e) {
@@ -1353,22 +1353,6 @@ public class HotelTest {
             System.out.println("PASSOU: testarFinalizarHospedagemInvalidaNaoAlteraEstado");
         } else {
             System.out.println("FALHOU: testarFinalizarHospedagemInvalidaNaoAlteraEstado");
-        }
-    }
-
-    private static Fatura invocarFinalizarHospedagem(Hotel hotel, int andar, int numero, int dias) {
-        try {
-            java.lang.reflect.Method metodo = Hotel.class.getMethod(
-                    "finalizarHospedagem", int.class, int.class, int.class);
-            return (Fatura) metodo.invoke(hotel, andar, numero, dias);
-        } catch (java.lang.reflect.InvocationTargetException e) {
-            Throwable causa = e.getCause();
-            if (causa instanceof RuntimeException) {
-                throw (RuntimeException) causa;
-            }
-            throw new IllegalStateException(causa);
-        } catch (ReflectiveOperationException e) {
-            throw new IllegalStateException(e);
         }
     }
 
