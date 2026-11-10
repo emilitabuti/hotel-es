@@ -42,6 +42,19 @@ public class HotelTest {
         testarCadastrarServicoNoHotel();
         testarCadastrarServicoInvalidoNaoAdiciona();
 
+        //consumo
+        testarCriarConsumoValido();
+        testarCriarConsumoComApartamentoNuloFalha();
+        testarCriarConsumoComServicoNuloFalha();
+        testarCriarConsumoComQuantidadeInvalidaFalha();
+        testarTotalEToStringConsumo();
+        testarRegistrarConsumoEmApartamentoOcupado();
+        testarRegistrarConsumoEmApartamentoNaoOcupadoFalha();
+        testarRegistrarConsumoComIndiceServicoInvalidoFalha();
+        testarRegistrarConsumoComQuantidadeInvalidaFalha();
+        testarConsumosDoApartamentoIsolados();
+        testarConsumosDoApartamentoComCoordenadaInvalidaFalha();
+
         //apartamento
         testarApartamentoNovoNasceLivre();
         testarReservarApartamentoLivre();
@@ -1741,6 +1754,239 @@ public class HotelTest {
             }
         } catch (Throwable e) {
             System.out.println("FALHOU: testarCadastrarServicoInvalidoNaoAdiciona (" + e.getClass().getSimpleName() + ")");
+        }
+    }
+
+    /**
+     * Verifica a criacao de um consumo com dados validos.
+     */
+    static void testarCriarConsumoValido() {
+        total++;
+        Apartamento apartamento = new ApartamentoSimples();
+        Servico servico = new Servico("Cafe", 12.5f);
+        Consumo consumo = new Consumo(apartamento, servico, 2);
+        if (consumo.getApartamento() == apartamento
+                && consumo.getServico() == servico
+                && consumo.getQuantidade() == 2) {
+            passou++;
+            System.out.println("PASSOU: testarCriarConsumoValido");
+        } else {
+            System.out.println("FALHOU: testarCriarConsumoValido");
+        }
+    }
+
+    /**
+     * Verifica que um consumo nao aceita apartamento nulo.
+     */
+    static void testarCriarConsumoComApartamentoNuloFalha() {
+        total++;
+        try {
+            new Consumo(null, new Servico("Cafe", 12.5f), 1);
+            System.out.println("FALHOU: testarCriarConsumoComApartamentoNuloFalha (nao lancou excecao)");
+        } catch (IllegalArgumentException e) {
+            passou++;
+            System.out.println("PASSOU: testarCriarConsumoComApartamentoNuloFalha");
+        } catch (Throwable e) {
+            System.out.println("FALHOU: testarCriarConsumoComApartamentoNuloFalha (" + e.getClass().getSimpleName() + ")");
+        }
+    }
+
+    /**
+     * Verifica que um consumo nao aceita servico nulo.
+     */
+    static void testarCriarConsumoComServicoNuloFalha() {
+        total++;
+        try {
+            new Consumo(new ApartamentoSimples(), null, 1);
+            System.out.println("FALHOU: testarCriarConsumoComServicoNuloFalha (nao lancou excecao)");
+        } catch (IllegalArgumentException e) {
+            passou++;
+            System.out.println("PASSOU: testarCriarConsumoComServicoNuloFalha");
+        } catch (Throwable e) {
+            System.out.println("FALHOU: testarCriarConsumoComServicoNuloFalha (" + e.getClass().getSimpleName() + ")");
+        }
+    }
+
+    /**
+     * Verifica que um consumo nao aceita quantidade zero ou negativa.
+     */
+    static void testarCriarConsumoComQuantidadeInvalidaFalha() {
+        total++;
+        boolean correto = true;
+        for (int quantidade : new int[] {0, -1}) {
+            try {
+                new Consumo(new ApartamentoSimples(), new Servico("Cafe", 12.5f), quantidade);
+                correto = false;
+            } catch (IllegalArgumentException e) {
+                // Entrada invalida rejeitada como esperado.
+            } catch (Throwable e) {
+                correto = false;
+            }
+        }
+        if (correto) {
+            passou++;
+            System.out.println("PASSOU: testarCriarConsumoComQuantidadeInvalidaFalha");
+        } else {
+            System.out.println("FALHOU: testarCriarConsumoComQuantidadeInvalidaFalha");
+        }
+    }
+
+    /**
+     * Verifica o total e a representacao textual do consumo.
+     */
+    static void testarTotalEToStringConsumo() {
+        total++;
+        Consumo consumo = new Consumo(new ApartamentoSimples(), new Servico("Cafe", 12.5f), 2);
+        if (consumo.getTotal() == 25.0f
+                && consumo.toString().contains("Cafe")
+                && consumo.toString().contains("x2")
+                && consumo.toString().contains("25.0")) {
+            passou++;
+            System.out.println("PASSOU: testarTotalEToStringConsumo");
+        } else {
+            System.out.println("FALHOU: testarTotalEToStringConsumo");
+        }
+    }
+
+    /**
+     * Verifica registro e calculo do total de um consumo em quarto ocupado.
+     */
+    static void testarRegistrarConsumoEmApartamentoOcupado() {
+        total++;
+        try {
+            Hotel hotel = new Hotel();
+            hotel.cadastrarServico("Cafe", 12.5f);
+            hotel.realizarCheckin(0, 0, hospedePadrao());
+            boolean registrado = hotel.registrarConsumo(0, 0, 0, 2);
+            if (registrado && hotel.getConsumos().size() == 1
+                    && hotel.getConsumos().get(0).getApartamento() == hotel.getApartamento(0, 0)
+                    && hotel.getConsumos().get(0).getTotal() == 25.0f) {
+                passou++;
+                System.out.println("PASSOU: testarRegistrarConsumoEmApartamentoOcupado");
+            } else {
+                System.out.println("FALHOU: testarRegistrarConsumoEmApartamentoOcupado");
+            }
+        } catch (Throwable e) {
+            System.out.println("FALHOU: testarRegistrarConsumoEmApartamentoOcupado (" + e.getClass().getSimpleName() + ")");
+        }
+    }
+
+    /**
+     * Verifica que consumo nao e registrado em apartamento livre ou reservado.
+     */
+    static void testarRegistrarConsumoEmApartamentoNaoOcupadoFalha() {
+        total++;
+        try {
+            Hotel hotel = new Hotel();
+            hotel.cadastrarServico("Cafe", 12.5f);
+            boolean quartoLivre = hotel.registrarConsumo(0, 0, 0, 1);
+            hotel.reservarApartamento(0, 1, hospedePadrao());
+            boolean quartoReservado = hotel.registrarConsumo(0, 1, 0, 1);
+            if (!quartoLivre && !quartoReservado && hotel.getConsumos().isEmpty()) {
+                passou++;
+                System.out.println("PASSOU: testarRegistrarConsumoEmApartamentoNaoOcupadoFalha");
+            } else {
+                System.out.println("FALHOU: testarRegistrarConsumoEmApartamentoNaoOcupadoFalha");
+            }
+        } catch (Throwable e) {
+            System.out.println("FALHOU: testarRegistrarConsumoEmApartamentoNaoOcupadoFalha (" + e.getClass().getSimpleName() + ")");
+        }
+    }
+
+    /**
+     * Verifica que registrar consumo rejeita indice de servico inexistente.
+     */
+    static void testarRegistrarConsumoComIndiceServicoInvalidoFalha() {
+        total++;
+        Hotel hotel = new Hotel();
+        hotel.cadastrarServico("Cafe", 12.5f);
+        hotel.realizarCheckin(0, 0, hospedePadrao());
+        try {
+            hotel.registrarConsumo(0, 0, 1, 1);
+            System.out.println("FALHOU: testarRegistrarConsumoComIndiceServicoInvalidoFalha (nao lancou excecao)");
+        } catch (IllegalArgumentException e) {
+            if (hotel.getConsumos().isEmpty()) {
+                passou++;
+                System.out.println("PASSOU: testarRegistrarConsumoComIndiceServicoInvalidoFalha");
+            } else {
+                System.out.println("FALHOU: testarRegistrarConsumoComIndiceServicoInvalidoFalha (consumo registrado)");
+            }
+        } catch (Throwable e) {
+            System.out.println("FALHOU: testarRegistrarConsumoComIndiceServicoInvalidoFalha (" + e.getClass().getSimpleName() + ")");
+        }
+    }
+
+    /**
+     * Verifica que registrar consumo rejeita quantidade zero ou negativa.
+     */
+    static void testarRegistrarConsumoComQuantidadeInvalidaFalha() {
+        total++;
+        Hotel hotel = new Hotel();
+        hotel.cadastrarServico("Cafe", 12.5f);
+        hotel.realizarCheckin(0, 0, hospedePadrao());
+        boolean correto = true;
+        try {
+            for (int quantidade : new int[] {0, -1}) {
+                try {
+                    hotel.registrarConsumo(0, 0, 0, quantidade);
+                    correto = false;
+                } catch (IllegalArgumentException e) {
+                    // Entrada invalida rejeitada como esperado.
+                } catch (Throwable e) {
+                    correto = false;
+                }
+            }
+        } catch (Throwable e) {
+            correto = false;
+        }
+        if (correto && hotel.getConsumos().isEmpty()) {
+            passou++;
+            System.out.println("PASSOU: testarRegistrarConsumoComQuantidadeInvalidaFalha");
+        } else {
+            System.out.println("FALHOU: testarRegistrarConsumoComQuantidadeInvalidaFalha");
+        }
+    }
+
+    /**
+     * Verifica que a consulta retorna apenas os consumos do apartamento indicado.
+     */
+    static void testarConsumosDoApartamentoIsolados() {
+        total++;
+        try {
+            Hotel hotel = new Hotel();
+            hotel.cadastrarServico("Cafe", 12.5f);
+            hotel.realizarCheckin(0, 0, hospedePadrao());
+            hotel.realizarCheckin(0, 1, new Hospede("456", "Maria", "Rua Y", "8888", "maria@y"));
+            hotel.registrarConsumo(0, 0, 0, 1);
+            hotel.registrarConsumo(0, 1, 0, 2);
+            if (hotel.getConsumosDoApartamento(0, 0).size() == 1
+                    && hotel.getConsumosDoApartamento(0, 0).get(0).getQuantidade() == 1
+                    && hotel.getConsumosDoApartamento(0, 1).size() == 1
+                    && hotel.getConsumosDoApartamento(0, 1).get(0).getQuantidade() == 2
+                    && hotel.getConsumosDoApartamento(1, 0).isEmpty()) {
+                passou++;
+                System.out.println("PASSOU: testarConsumosDoApartamentoIsolados");
+            } else {
+                System.out.println("FALHOU: testarConsumosDoApartamentoIsolados");
+            }
+        } catch (Throwable e) {
+            System.out.println("FALHOU: testarConsumosDoApartamentoIsolados (" + e.getClass().getSimpleName() + ")");
+        }
+    }
+
+    /**
+     * Verifica que consultar consumos com coordenadas invalidas lanca excecao.
+     */
+    static void testarConsumosDoApartamentoComCoordenadaInvalidaFalha() {
+        total++;
+        try {
+            new Hotel().getConsumosDoApartamento(-1, 0);
+            System.out.println("FALHOU: testarConsumosDoApartamentoComCoordenadaInvalidaFalha (nao lancou excecao)");
+        } catch (IllegalArgumentException e) {
+            passou++;
+            System.out.println("PASSOU: testarConsumosDoApartamentoComCoordenadaInvalidaFalha");
+        } catch (Throwable e) {
+            System.out.println("FALHOU: testarConsumosDoApartamentoComCoordenadaInvalidaFalha (" + e.getClass().getSimpleName() + ")");
         }
     }
 }
