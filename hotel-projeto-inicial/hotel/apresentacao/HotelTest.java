@@ -2101,7 +2101,7 @@ public class HotelTest {
                     && fatura.getTotalDiarias() == 300.0f
                     && fatura.getTotalConsumos() == 30.0f
                     && fatura.getTotalGeral() == 330.0f
-                    && fatura.toString().contains("330.0")) {
+                    && fatura.toString().contains("TOTAL GERAL: R$ 330,00")) {
                 passou++;
                 System.out.println("PASSOU: testarCriarFaturaComDiariasEConsumos");
             } else {
