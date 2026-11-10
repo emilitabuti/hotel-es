@@ -40,14 +40,14 @@ public class Main {
             System.out.println("\n=== SISTEMA DE GESTÃO DE HOTEL ===");
             System.out.println("1  - Reservar apartamento");
             System.out.println("2  - Realizar Check-in");
-            System.out.println("3  - Realizar Check-out");
+            System.out.println("3  - Realizar Check-out com fatura");
             System.out.println("4  - Cancelar reserva");
             System.out.println("5  - Mostrar mapa de ocupação");
             System.out.println("6  - Consultar apartamento");
             System.out.println("7  - Mostrar taxas de ocupação e reservas");
             System.out.println("8  - Cadastrar serviço no cardápio");
             System.out.println("9  - Registrar consumo de serviço");
-            System.out.println("10 - Emitir fatura de apartamento");
+            System.out.println("10 - Emitir fatura de apartamento (prévia)");
             System.out.println("11 - Relatório de ocupação");
             System.out.println("12 - Ranking de serviços");
             System.out.println("13 - Salvar dados em arquivo");
@@ -85,15 +85,16 @@ public class Main {
                             System.out.println("Não foi possível realizar check-in.");
                         }
                         break;
-                    case 3:
+                    case 3: {
                         andar = lerAndar();
                         numero = lerNumero();
-                        if (hotel.realizarCheckout(andar, numero)) {
-                            System.out.println("Check-out realizado com sucesso.");
-                        } else {
-                            System.out.println("Não foi possível realizar check-out.");
-                        }
+                        System.out.print("Quantidade de diárias: ");
+                        int dias = Integer.parseInt(scanner.nextLine());
+                        Fatura fatura = hotel.finalizarHospedagem(andar, numero, dias);
+                        System.out.println(fatura);
+                        System.out.println("Check-out realizado com sucesso.");
                         break;
+                    }
                     case 4:
                         andar = lerAndar();
                         numero = lerNumero();
@@ -136,14 +137,14 @@ public class Main {
                             System.out.println("Não foi possível registrar consumo.");
                         }
                         break;
-                    case 10:
+                    case 10: {
                         andar = lerAndar();
                         numero = lerNumero();
                         System.out.print("Quantidade de dias: ");
-                        int dias = Integer.parseInt(scanner.nextLine());
-                        Fatura fatura = hotel.emitirFatura(andar, numero, dias);
-                        System.out.println(fatura);
+                        int diasPrevia = Integer.parseInt(scanner.nextLine());
+                        System.out.println(hotel.emitirFatura(andar, numero, diasPrevia));
                         break;
+                    }
                     case 11:
                         new RelatorioSvc(hotel).gerarRelatorioOcupacao();
                         break;
@@ -166,7 +167,7 @@ public class Main {
                 }
             } catch (UnsupportedOperationException e) {
                 System.out.println("Funcionalidade não implementada: " + e.getMessage());
-            } catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException | IllegalStateException e) {
                 System.out.println("Erro: " + e.getMessage());
             } catch (Exception e) {
                 System.out.println("Erro inesperado: " + e.getMessage());

@@ -139,14 +139,18 @@ public class Hotel {
 
         // Check-in de uma reserva existente
         if (apto.estaReservado() && apto.getHospede() != null) {
-            String identificadorAnterior = apto.getHospede().getIdentificadorReserva();
-            hospede.setIdentificadorReserva(identificadorAnterior);
+            Hospede titular = apto.getHospede();
+            if (!titular.getCpf().equals(hospede.getCpf())) {
+                return false;
+            }
+            hospede.setIdentificadorReserva(titular.getIdentificadorReserva());
+            apto.checkin(titular);
         } else {
             // Check-in direto sempre representa uma nova hospedagem
             String novoIdentificador = criarIdentificadorReserva(andar, numero);
             hospede.setIdentificadorReserva(novoIdentificador);
+            apto.checkin(hospede);
         }
-        apto.checkin(hospede);
         return true;
     }
 
@@ -166,8 +170,38 @@ public class Hotel {
 
         if (!apto.estaOcupado()) { return false; }
 
+        String identificadorHospedagem = Consumo.extrairIdentificadorHospedagem(
+                apto.getHospede().getIdentificadorReserva());
         apto.checkout();
+        consumos.removeIf(consumo -> consumo.getApartamento() == apto
+                || (identificadorHospedagem != null
+                && identificadorHospedagem.equals(consumo.getIdentificadorHospedagem())));
         return true;
+    }
+
+    /**
+     * Emite a fatura e encerra uma hospedagem ocupada.
+     *
+     * @param andar andar do apartamento
+     * @param numero numero do apartamento
+     * @param dias quantidade de diarias, maior que zero
+     * @return fatura final da hospedagem
+     * @throws IllegalArgumentException se as coordenadas ou os dias forem invalidos
+     * @throws IllegalStateException se o apartamento nao estiver ocupado
+     */
+    public Fatura finalizarHospedagem(int andar, int numero, int dias) {
+        validarCoordenadas(andar, numero);
+        if (dias <= 0) {
+            throw new IllegalArgumentException("Quantidade de dias deve ser maior que zero");
+        }
+        Apartamento apartamento = matriz[andar][numero];
+        if (!apartamento.estaOcupado()) {
+            throw new IllegalStateException("Apartamento precisa estar ocupado para finalizar hospedagem");
+        }
+
+        Fatura fatura = emitirFatura(andar, numero, dias);
+        realizarCheckout(andar, numero);
+        return fatura;
     }
 
     /**
@@ -384,11 +418,11 @@ public class Hotel {
                 ? null
                 : Consumo.extrairIdentificadorHospedagem(hospede.getIdentificadorReserva());
         ArrayList<Consumo> consumosDoApartamento = new ArrayList<>();
+        if (identificadorHospedagem == null) {
+            return consumosDoApartamento;
+        }
         for (Consumo consumo : consumos) {
-            boolean mesmoApartamento = consumo.getApartamento() == apartamento;
-            boolean mesmaHospedagem = identificadorHospedagem != null
-                    && identificadorHospedagem.equals(consumo.getIdentificadorHospedagem());
-            if (mesmoApartamento || mesmaHospedagem) {
+            if (identificadorHospedagem.equals(consumo.getIdentificadorHospedagem())) {
                 consumosDoApartamento.add(consumo);
             }
         }
@@ -409,7 +443,11 @@ public class Hotel {
         if (dias <= 0) {
             throw new IllegalArgumentException("Quantidade de dias deve ser maior que zero");
         }
-        return new Fatura(matriz[andar][numero], dias, getConsumosDoApartamento(andar, numero));
+        Apartamento apartamento = matriz[andar][numero];
+        if (!apartamento.estaOcupado()) {
+            throw new IllegalStateException("Apartamento precisa estar ocupado para emitir fatura");
+        }
+        return new Fatura(apartamento, dias, getConsumosDoApartamento(andar, numero));
     }
 
     /**
