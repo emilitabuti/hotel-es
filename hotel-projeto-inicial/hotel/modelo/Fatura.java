@@ -8,6 +8,7 @@ public class Fatura {
     private final Apartamento apartamento;
     private final int dias;
     private final List<Consumo> consumos;
+    private final float precoDiaria;
     private final float totalDiarias;
     private final float totalConsumos;
 
@@ -29,9 +30,13 @@ public class Fatura {
         if (consumos == null) {
             throw new IllegalArgumentException("Lista de consumos nao pode ser nula");
         }
+        if (consumos.contains(null)) {
+            throw new IllegalArgumentException("Consumo nao pode ser nulo");
+        }
         this.apartamento = apto;
         this.dias = dias;
         this.consumos = new ArrayList<>(consumos);
+        this.precoDiaria = apto.getPrecoDiaria();
         this.totalDiarias = calcularTotalDiarias();
         this.totalConsumos = calcularTotalConsumos();
     }
@@ -78,7 +83,7 @@ public class Fatura {
     }
 
     private float calcularTotalDiarias() {
-        return dias * apartamento.getPrecoDiaria();
+        return dias * precoDiaria;
     }
 
     /**
@@ -105,6 +110,25 @@ public class Fatura {
      */
     @Override
     public String toString() {
-        return "Fatura: R$ " + getTotalGeral();
+        String separador = System.lineSeparator();
+        StringBuilder fatura = new StringBuilder(separador)
+                .append("========== FATURA ==========").append(separador);
+        fatura.append(String.format(java.util.Locale.forLanguageTag("pt-BR"),
+                "Diarias: %d x R$ %.2f = R$ %.2f%n",
+                dias, precoDiaria, totalDiarias));
+        fatura.append("Servicos consumidos:").append(separador);
+        if (consumos.isEmpty()) {
+            fatura.append("  Nenhum consumo registrado.").append(separador);
+        } else {
+            for (Consumo consumo : consumos) {
+                fatura.append("  ").append(consumo).append(separador);
+            }
+        }
+        fatura.append(String.format(java.util.Locale.forLanguageTag("pt-BR"),
+                "Subtotal de servicos: R$ %.2f%n", totalConsumos));
+        fatura.append(String.format(java.util.Locale.forLanguageTag("pt-BR"),
+                "TOTAL GERAL: R$ %.2f%n", getTotalGeral()));
+        fatura.append("============================");
+        return fatura.toString();
     }
 }
