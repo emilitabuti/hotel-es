@@ -379,9 +379,16 @@ public class Hotel {
     public ArrayList<Consumo> getConsumosDoApartamento(int andar, int numero) {
         validarCoordenadas(andar, numero);
         Apartamento apartamento = matriz[andar][numero];
+        Hospede hospede = apartamento.getHospede();
+        String identificadorHospedagem = hospede == null
+                ? null
+                : Consumo.extrairIdentificadorHospedagem(hospede.getIdentificadorReserva());
         ArrayList<Consumo> consumosDoApartamento = new ArrayList<>();
         for (Consumo consumo : consumos) {
-            if (consumo.getApartamento() == apartamento) {
+            boolean mesmoApartamento = consumo.getApartamento() == apartamento;
+            boolean mesmaHospedagem = identificadorHospedagem != null
+                    && identificadorHospedagem.equals(consumo.getIdentificadorHospedagem());
+            if (mesmoApartamento || mesmaHospedagem) {
                 consumosDoApartamento.add(consumo);
             }
         }

@@ -4,6 +4,7 @@ public class Consumo {
     private final Apartamento apartamento;
     private final Servico servico;
     private final int quantidade;
+    private final String identificadorHospedagem;
 
     /**
      * Cria um consumo associado a um apartamento e a um servico.
@@ -26,6 +27,26 @@ public class Consumo {
         this.apartamento = apto;
         this.servico = servico;
         this.quantidade = quantidade;
+        Hospede hospede = apto.getHospede();
+        this.identificadorHospedagem = hospede == null
+                ? null
+                : extrairIdentificadorHospedagem(hospede.getIdentificadorReserva());
+    }
+
+    /**
+     * Extrai o identificador estavel da hospedagem, sem o sufixo do quarto.
+     *
+     * @param identificadorReserva identificador da reserva, possivelmente nulo
+     * @return identificador da hospedagem ou nulo
+     */
+    public static String extrairIdentificadorHospedagem(String identificadorReserva) {
+        if (identificadorReserva == null) {
+            return null;
+        }
+        int indiceQuarto = identificadorReserva.indexOf("-Q");
+        return indiceQuarto >= 0
+                ? identificadorReserva.substring(0, indiceQuarto)
+                : identificadorReserva;
     }
 
     /**
@@ -50,6 +71,13 @@ public class Consumo {
     public int getQuantidade() { return quantidade; }
 
     /**
+     * Retorna o identificador estavel da hospedagem associada ao consumo.
+     *
+     * @return identificador da hospedagem ou nulo se o apartamento nao tinha hospede
+     */
+    public String getIdentificadorHospedagem() { return identificadorHospedagem; }
+
+    /**
      * Calcula o valor total deste consumo.
      *
      * @return preco do servico multiplicado pela quantidade
@@ -65,6 +93,8 @@ public class Consumo {
      */
     @Override
     public String toString() {
-        return servico.getNome() + " x" + quantidade + " = R$ " + getTotal();
+        return String.format(java.util.Locale.forLanguageTag("pt-BR"),
+                "%s | %d x R$ %.2f = R$ %.2f",
+                servico.getNome(), quantidade, servico.getPreco(), getTotal());
     }
 }
