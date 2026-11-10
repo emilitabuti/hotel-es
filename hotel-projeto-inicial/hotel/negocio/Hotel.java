@@ -388,11 +388,21 @@ public class Hotel {
         return consumosDoApartamento;
     }
 
+    /**
+     * Emite uma fatura com diarias e consumos de um apartamento.
+     *
+     * @param andar andar do apartamento
+     * @param numero numero do apartamento
+     * @param dias quantidade de diarias, maior que zero
+     * @return fatura do apartamento
+     * @throws IllegalArgumentException se as coordenadas ou os dias forem invalidos
+     */
     public Fatura emitirFatura(int andar, int numero, int dias) {
-        if (!aptoValido(andar, numero)) {
-            throw new IllegalArgumentException("Andar ou numero invalido");
+        validarCoordenadas(andar, numero);
+        if (dias <= 0) {
+            throw new IllegalArgumentException("Quantidade de dias deve ser maior que zero");
         }
-        throw new UnsupportedOperationException("Implementar emitirFatura");
+        return new Fatura(matriz[andar][numero], dias, getConsumosDoApartamento(andar, numero));
     }
 
     /**
