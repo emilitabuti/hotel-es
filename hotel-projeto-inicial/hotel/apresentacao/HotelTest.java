@@ -55,6 +55,17 @@ public class HotelTest {
         testarConsumosDoApartamentoIsolados();
         testarConsumosDoApartamentoComCoordenadaInvalidaFalha();
 
+        //fatura
+        testarCriarFaturaComDiariasEConsumos();
+        testarCriarFaturaSemConsumos();
+        testarCriarFaturaComApartamentoNuloFalha();
+        testarCriarFaturaComDiasInvalidosFalha();
+        testarCriarFaturaComListaDeConsumosNulaFalha();
+        testarEmitirFaturaIntegraDiariasEConsumos();
+        testarEmitirFaturaApartamentoPremium();
+        testarEmitirFaturaComCoordenadaInvalidaFalha();
+        testarEmitirFaturaComDiasInvalidosFalha();
+
         //apartamento
         testarApartamentoNovoNasceLivre();
         testarReservarApartamentoLivre();
@@ -1988,6 +1999,198 @@ public class HotelTest {
             System.out.println("PASSOU: testarConsumosDoApartamentoComCoordenadaInvalidaFalha");
         } catch (Throwable e) {
             System.out.println("FALHOU: testarConsumosDoApartamentoComCoordenadaInvalidaFalha (" + e.getClass().getSimpleName() + ")");
+        }
+    }
+
+    /**
+     * Verifica o calculo das diarias, dos consumos e do total geral.
+     */
+    static void testarCriarFaturaComDiariasEConsumos() {
+        total++;
+        try {
+            Apartamento apartamento = new ApartamentoSimples();
+            Servico cafe = new Servico("Cafe", 12.5f);
+            Servico agua = new Servico("Agua", 5.0f);
+            java.util.List<Consumo> consumos = java.util.Arrays.asList(
+                    new Consumo(apartamento, cafe, 2),
+                    new Consumo(apartamento, agua, 1));
+            Fatura fatura = new Fatura(apartamento, 2, consumos);
+            if (fatura.getApartamento() == apartamento
+                    && fatura.getDias() == 2
+                    && fatura.getConsumos().size() == 2
+                    && fatura.getTotalDiarias() == 300.0f
+                    && fatura.getTotalConsumos() == 30.0f
+                    && fatura.getTotalGeral() == 330.0f
+                    && fatura.toString().contains("330.0")) {
+                passou++;
+                System.out.println("PASSOU: testarCriarFaturaComDiariasEConsumos");
+            } else {
+                System.out.println("FALHOU: testarCriarFaturaComDiariasEConsumos");
+            }
+        } catch (Throwable e) {
+            System.out.println("FALHOU: testarCriarFaturaComDiariasEConsumos (" + e.getClass().getSimpleName() + ")");
+        }
+    }
+
+    /**
+     * Verifica que uma fatura sem consumos cobra apenas as diarias.
+     */
+    static void testarCriarFaturaSemConsumos() {
+        total++;
+        try {
+            Fatura fatura = new Fatura(new ApartamentoPremium(), 1, java.util.Collections.<Consumo>emptyList());
+            if (fatura.getTotalDiarias() == 350.0f
+                    && fatura.getTotalConsumos() == 0.0f
+                    && fatura.getTotalGeral() == 350.0f) {
+                passou++;
+                System.out.println("PASSOU: testarCriarFaturaSemConsumos");
+            } else {
+                System.out.println("FALHOU: testarCriarFaturaSemConsumos");
+            }
+        } catch (Throwable e) {
+            System.out.println("FALHOU: testarCriarFaturaSemConsumos (" + e.getClass().getSimpleName() + ")");
+        }
+    }
+
+    /**
+     * Verifica que uma fatura nao aceita apartamento nulo.
+     */
+    static void testarCriarFaturaComApartamentoNuloFalha() {
+        total++;
+        try {
+            new Fatura(null, 1, java.util.Collections.<Consumo>emptyList());
+            System.out.println("FALHOU: testarCriarFaturaComApartamentoNuloFalha (nao lancou excecao)");
+        } catch (IllegalArgumentException e) {
+            passou++;
+            System.out.println("PASSOU: testarCriarFaturaComApartamentoNuloFalha");
+        } catch (Throwable e) {
+            System.out.println("FALHOU: testarCriarFaturaComApartamentoNuloFalha (" + e.getClass().getSimpleName() + ")");
+        }
+    }
+
+    /**
+     * Verifica que uma fatura nao aceita zero ou dias negativos.
+     */
+    static void testarCriarFaturaComDiasInvalidosFalha() {
+        total++;
+        boolean correto = true;
+        for (int dias : new int[] {0, -1}) {
+            try {
+                new Fatura(new ApartamentoSimples(), dias, java.util.Collections.<Consumo>emptyList());
+                correto = false;
+            } catch (IllegalArgumentException e) {
+                // Entrada invalida rejeitada como esperado.
+            } catch (Throwable e) {
+                correto = false;
+            }
+        }
+        if (correto) {
+            passou++;
+            System.out.println("PASSOU: testarCriarFaturaComDiasInvalidosFalha");
+        } else {
+            System.out.println("FALHOU: testarCriarFaturaComDiasInvalidosFalha");
+        }
+    }
+
+    /**
+     * Verifica que uma fatura nao aceita lista de consumos nula.
+     */
+    static void testarCriarFaturaComListaDeConsumosNulaFalha() {
+        total++;
+        try {
+            new Fatura(new ApartamentoSimples(), 1, null);
+            System.out.println("FALHOU: testarCriarFaturaComListaDeConsumosNulaFalha (nao lancou excecao)");
+        } catch (IllegalArgumentException e) {
+            passou++;
+            System.out.println("PASSOU: testarCriarFaturaComListaDeConsumosNulaFalha");
+        } catch (Throwable e) {
+            System.out.println("FALHOU: testarCriarFaturaComListaDeConsumosNulaFalha (" + e.getClass().getSimpleName() + ")");
+        }
+    }
+
+    /**
+     * Verifica que o hotel emite fatura integrando diarias e consumos do apartamento.
+     */
+    static void testarEmitirFaturaIntegraDiariasEConsumos() {
+        total++;
+        try {
+            Hotel hotel = hotelComApartamentoOcupadoEComServico();
+            hotel.registrarConsumo(0, 0, 0, 2);
+            Fatura fatura = hotel.emitirFatura(0, 0, 2);
+            if (fatura.getApartamento() == hotel.getApartamento(0, 0)
+                    && fatura.getTotalDiarias() == 300.0f
+                    && fatura.getTotalConsumos() == 25.0f
+                    && fatura.getTotalGeral() == 325.0f) {
+                passou++;
+                System.out.println("PASSOU: testarEmitirFaturaIntegraDiariasEConsumos");
+            } else {
+                System.out.println("FALHOU: testarEmitirFaturaIntegraDiariasEConsumos");
+            }
+        } catch (Throwable e) {
+            System.out.println("FALHOU: testarEmitirFaturaIntegraDiariasEConsumos (" + e.getClass().getSimpleName() + ")");
+        }
+    }
+
+    /**
+     * Verifica que a fatura usa a diaria premium do apartamento.
+     */
+    static void testarEmitirFaturaApartamentoPremium() {
+        total++;
+        try {
+            Hotel hotel = new Hotel();
+            hotel.realizarCheckin(0, 8, hospedePadrao());
+            Fatura fatura = hotel.emitirFatura(0, 8, 2);
+            if (fatura.getTotalDiarias() == 700.0f
+                    && fatura.getTotalConsumos() == 0.0f
+                    && fatura.getTotalGeral() == 700.0f) {
+                passou++;
+                System.out.println("PASSOU: testarEmitirFaturaApartamentoPremium");
+            } else {
+                System.out.println("FALHOU: testarEmitirFaturaApartamentoPremium");
+            }
+        } catch (Throwable e) {
+            System.out.println("FALHOU: testarEmitirFaturaApartamentoPremium (" + e.getClass().getSimpleName() + ")");
+        }
+    }
+
+    /**
+     * Verifica que emitir fatura rejeita coordenadas invalidas.
+     */
+    static void testarEmitirFaturaComCoordenadaInvalidaFalha() {
+        total++;
+        try {
+            new Hotel().emitirFatura(-1, 0, 1);
+            System.out.println("FALHOU: testarEmitirFaturaComCoordenadaInvalidaFalha (nao lancou excecao)");
+        } catch (IllegalArgumentException e) {
+            passou++;
+            System.out.println("PASSOU: testarEmitirFaturaComCoordenadaInvalidaFalha");
+        } catch (Throwable e) {
+            System.out.println("FALHOU: testarEmitirFaturaComCoordenadaInvalidaFalha (" + e.getClass().getSimpleName() + ")");
+        }
+    }
+
+    /**
+     * Verifica que emitir fatura rejeita dias zero ou negativos.
+     */
+    static void testarEmitirFaturaComDiasInvalidosFalha() {
+        total++;
+        Hotel hotel = new Hotel();
+        boolean correto = true;
+        for (int dias : new int[] {0, -1}) {
+            try {
+                hotel.emitirFatura(0, 0, dias);
+                correto = false;
+            } catch (IllegalArgumentException e) {
+                // Entrada invalida rejeitada como esperado.
+            } catch (Throwable e) {
+                correto = false;
+            }
+        }
+        if (correto) {
+            passou++;
+            System.out.println("PASSOU: testarEmitirFaturaComDiasInvalidosFalha");
+        } else {
+            System.out.println("FALHOU: testarEmitirFaturaComDiasInvalidosFalha");
         }
     }
 }
