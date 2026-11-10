@@ -54,6 +54,10 @@ public class HotelTest {
         testarRegistrarConsumoComQuantidadeInvalidaFalha();
         testarConsumosDoApartamentoIsolados();
         testarConsumosDoApartamentoComCoordenadaInvalidaFalha();
+        testarExtrairIdentificadorHospedagem();
+        testarCriarConsumoCapturaIdentificadorHospedagem();
+        testarToStringConsumoFormataMoedaBrasileira();
+        testarFaturaMantemConsumoAposTransferencia();
 
         //fatura
         testarCriarFaturaComDiariasEConsumos();
@@ -1999,6 +2003,93 @@ public class HotelTest {
             System.out.println("PASSOU: testarConsumosDoApartamentoComCoordenadaInvalidaFalha");
         } catch (Throwable e) {
             System.out.println("FALHOU: testarConsumosDoApartamentoComCoordenadaInvalidaFalha (" + e.getClass().getSimpleName() + ")");
+        }
+    }
+
+    /**
+     * Verifica a extracao do identificador estavel da hospedagem.
+     */
+    static void testarExtrairIdentificadorHospedagem() {
+        total++;
+        try {
+            java.lang.reflect.Method metodo =
+                    Consumo.class.getMethod("extrairIdentificadorHospedagem", String.class);
+            Object comQuarto = metodo.invoke(null, "RES-0001-Q0101");
+            Object semQuarto = metodo.invoke(null, "RES-0002");
+            Object nulo = metodo.invoke(null, new Object[] {null});
+            if ("RES-0001".equals(comQuarto)
+                    && "RES-0002".equals(semQuarto)
+                    && nulo == null) {
+                passou++;
+                System.out.println("PASSOU: testarExtrairIdentificadorHospedagem");
+            } else {
+                System.out.println("FALHOU: testarExtrairIdentificadorHospedagem");
+            }
+        } catch (ReflectiveOperationException e) {
+            System.out.println("FALHOU: testarExtrairIdentificadorHospedagem (" + e.getClass().getSimpleName() + ")");
+        }
+    }
+
+    /**
+     * Verifica que o consumo guarda o identificador da hospedagem do hospede.
+     */
+    static void testarCriarConsumoCapturaIdentificadorHospedagem() {
+        total++;
+        try {
+            Hotel hotel = hotelComApartamentoOcupadoEComServico();
+            Apartamento apartamento = hotel.getApartamento(0, 0);
+            Consumo consumo = new Consumo(apartamento, hotel.getServicos().get(0), 1);
+            java.lang.reflect.Method metodo =
+                    Consumo.class.getMethod("getIdentificadorHospedagem");
+            if ("RES-0001".equals(metodo.invoke(consumo))) {
+                passou++;
+                System.out.println("PASSOU: testarCriarConsumoCapturaIdentificadorHospedagem");
+            } else {
+                System.out.println("FALHOU: testarCriarConsumoCapturaIdentificadorHospedagem");
+            }
+        } catch (ReflectiveOperationException e) {
+            System.out.println("FALHOU: testarCriarConsumoCapturaIdentificadorHospedagem (" + e.getClass().getSimpleName() + ")");
+        } catch (Throwable e) {
+            System.out.println("FALHOU: testarCriarConsumoCapturaIdentificadorHospedagem (" + e.getClass().getSimpleName() + ")");
+        }
+    }
+
+    /**
+     * Verifica que o consumo formata os valores com virgula e duas casas decimais.
+     */
+    static void testarToStringConsumoFormataMoedaBrasileira() {
+        total++;
+        Consumo consumo = new Consumo(new ApartamentoSimples(), new Servico("Cafe", 12.5f), 2);
+        String esperado = "Cafe | 2 x R$ 12,50 = R$ 25,00";
+        if (esperado.equals(consumo.toString())) {
+            passou++;
+            System.out.println("PASSOU: testarToStringConsumoFormataMoedaBrasileira");
+        } else {
+            System.out.println("FALHOU: testarToStringConsumoFormataMoedaBrasileira");
+        }
+    }
+
+    /**
+     * Verifica que a fatura inclui consumo anterior a transferencia de quarto.
+     */
+    static void testarFaturaMantemConsumoAposTransferencia() {
+        total++;
+        try {
+            Hotel hotel = hotelComApartamentoOcupadoEComServico();
+            hotel.registrarConsumo(0, 0, 0, 2);
+            boolean transferido = hotel.transferirHospede(0, 0, 0, 4);
+            Fatura fatura = hotel.emitirFatura(0, 4, 1);
+            if (transferido
+                    && fatura.getConsumos().size() == 1
+                    && fatura.getTotalConsumos() == 25.0f
+                    && fatura.getTotalGeral() == 375.0f) {
+                passou++;
+                System.out.println("PASSOU: testarFaturaMantemConsumoAposTransferencia");
+            } else {
+                System.out.println("FALHOU: testarFaturaMantemConsumoAposTransferencia");
+            }
+        } catch (Throwable e) {
+            System.out.println("FALHOU: testarFaturaMantemConsumoAposTransferencia (" + e.getClass().getSimpleName() + ")");
         }
     }
 
