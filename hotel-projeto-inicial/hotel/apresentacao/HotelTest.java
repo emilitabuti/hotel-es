@@ -2009,22 +2009,13 @@ public class HotelTest {
      */
     static void testarExtrairIdentificadorHospedagem() {
         total++;
-        try {
-            java.lang.reflect.Method metodo =
-                    Consumo.class.getMethod("extrairIdentificadorHospedagem", String.class);
-            Object comQuarto = metodo.invoke(null, "RES-0001-Q0101");
-            Object semQuarto = metodo.invoke(null, "RES-0002");
-            Object nulo = metodo.invoke(null, new Object[] {null});
-            if ("RES-0001".equals(comQuarto)
-                    && "RES-0002".equals(semQuarto)
-                    && nulo == null) {
-                passou++;
-                System.out.println("PASSOU: testarExtrairIdentificadorHospedagem");
-            } else {
-                System.out.println("FALHOU: testarExtrairIdentificadorHospedagem");
-            }
-        } catch (ReflectiveOperationException e) {
-            System.out.println("FALHOU: testarExtrairIdentificadorHospedagem (" + e.getClass().getSimpleName() + ")");
+        if ("RES-0001".equals(Consumo.extrairIdentificadorHospedagem("RES-0001-Q0101"))
+                && "RES-0002".equals(Consumo.extrairIdentificadorHospedagem("RES-0002"))
+                && Consumo.extrairIdentificadorHospedagem(null) == null) {
+            passou++;
+            System.out.println("PASSOU: testarExtrairIdentificadorHospedagem");
+        } else {
+            System.out.println("FALHOU: testarExtrairIdentificadorHospedagem");
         }
     }
 
@@ -2037,16 +2028,12 @@ public class HotelTest {
             Hotel hotel = hotelComApartamentoOcupadoEComServico();
             Apartamento apartamento = hotel.getApartamento(0, 0);
             Consumo consumo = new Consumo(apartamento, hotel.getServicos().get(0), 1);
-            java.lang.reflect.Method metodo =
-                    Consumo.class.getMethod("getIdentificadorHospedagem");
-            if ("RES-0001".equals(metodo.invoke(consumo))) {
+            if ("RES-0001".equals(consumo.getIdentificadorHospedagem())) {
                 passou++;
                 System.out.println("PASSOU: testarCriarConsumoCapturaIdentificadorHospedagem");
             } else {
                 System.out.println("FALHOU: testarCriarConsumoCapturaIdentificadorHospedagem");
             }
-        } catch (ReflectiveOperationException e) {
-            System.out.println("FALHOU: testarCriarConsumoCapturaIdentificadorHospedagem (" + e.getClass().getSimpleName() + ")");
         } catch (Throwable e) {
             System.out.println("FALHOU: testarCriarConsumoCapturaIdentificadorHospedagem (" + e.getClass().getSimpleName() + ")");
         }
