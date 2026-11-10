@@ -12,13 +12,17 @@ public class Servico {
      * @throws IllegalArgumentException se o nome ou o preco forem invalidos
      */
     public Servico(String nome, float preco) {
-        if (nome == null || nome.trim().isEmpty()) {
+        if (nome == null) {
+            throw new IllegalArgumentException("Nome do servico nao pode ser vazio");
+        }
+        String nomeNormalizado = nome.trim();
+        if (nomeNormalizado.isEmpty()) {
             throw new IllegalArgumentException("Nome do servico nao pode ser vazio");
         }
         if (!Float.isFinite(preco) || preco <= 0.0f) {
             throw new IllegalArgumentException("Preco do servico deve ser positivo e finito");
         }
-        this.nome = nome.trim();
+        this.nome = nomeNormalizado;
         this.preco = preco;
     }
 
